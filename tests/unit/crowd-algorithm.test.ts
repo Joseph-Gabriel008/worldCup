@@ -4,7 +4,7 @@
  * Tests the mock sensor data generator and density level calculations.
  */
 import { describe, it, expect } from 'vitest';
-import { generateCrowdSnapshot, getZoneDensity } from '../server/src/data/mockSensorGenerator';
+import { generateCrowdSnapshot, getZoneDensity } from '../../server/src/data/mockSensorGenerator';
 
 describe('Mock Sensor Generator', () => {
   it('should generate density data for all zones', () => {

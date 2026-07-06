@@ -5,7 +5,7 @@
  * threshold check → alert generation
  */
 import { describe, it, expect } from 'vitest';
-import { generateCrowdSnapshot } from '../server/src/data/mockSensorGenerator';
+import { generateCrowdSnapshot } from '../../server/src/data/mockSensorGenerator';
 
 describe('Crowd Alert Pipeline', () => {
   const ALERT_THRESHOLD = 0.75;
