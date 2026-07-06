@@ -69,6 +69,15 @@ async function request<T>(
     }
   }
 
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    await response.text();
+    return {
+      success: false,
+      error: 'Received non-JSON response. The backend might be offline or VITE_API_URL is missing.',
+    } as unknown as ApiResponse<T>;
+  }
+
   return response.json() as Promise<ApiResponse<T>>;
 }
 
