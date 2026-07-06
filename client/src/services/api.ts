@@ -1,8 +1,7 @@
 /**
- * StadiumPulse AI - API Service Layer
+ * StadiumPulse AI - Mock API Service Layer
  *
- * All HTTP API calls are isolated here. Components never make direct fetch calls.
- * Handles token refresh automatically on 401 responses.
+ * Provides mock data for Netlify frontend-only deployments.
  */
 import type {
   ApiResponse,
@@ -13,139 +12,109 @@ import type {
   Task,
   Announcement,
   VenueZone,
+  User,
 } from '@/types';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
-
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<ApiResponse<T>> {
-  const token = localStorage.getItem('accessToken');
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
-
-  // Handle token expiry — attempt refresh
-  if (response.status === 401 && token) {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken) {
-      try {
-        const refreshRes = await fetch(`${API_BASE}/api/auth/refresh`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken }),
-        });
-
-        if (refreshRes.ok) {
-          const refreshData = (await refreshRes.json()) as ApiResponse<{
-            accessToken: string;
-            refreshToken: string;
-          }>;
-          if (refreshData.data) {
-            localStorage.setItem('accessToken', refreshData.data.accessToken);
-            localStorage.setItem('refreshToken', refreshData.data.refreshToken);
-            // Retry original request
-            headers['Authorization'] = `Bearer ${refreshData.data.accessToken}`;
-            const retryRes = await fetch(`${API_BASE}${path}`, { ...options, headers });
-            return retryRes.json() as Promise<ApiResponse<T>>;
-          }
-        }
-      } catch {
-        // Refresh failed — clear auth
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-      }
-    }
-  }
-
-  const contentType = response.headers.get('content-type');
-  if (!contentType || !contentType.includes('application/json')) {
-    await response.text();
-    return {
-      success: false,
-      error: 'Received non-JSON response. The backend might be offline or VITE_API_URL is missing.',
-    } as unknown as ApiResponse<T>;
-  }
-
-  return response.json() as Promise<ApiResponse<T>>;
+function delay<T>(data: T, ms = 500): Promise<ApiResponse<T>> {
+  return new Promise((resolve) => setTimeout(() => resolve({ success: true, data }), ms));
 }
 
 // ── Auth ──────────────────────────────────────────────────────
 
-export async function login(email: string, password: string) {
-  return request<AuthResponse>('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
+export async function login(email: string, _password: string) {
+  const role = email.includes('admin') ? 'ADMIN' : email.includes('organizer') ? 'ORGANIZER' : email.includes('volunteer') ? 'VOLUNTEER' : 'FAN';
+  const user: User = { id: 'mock-user-1', email, name: email.split('@')[0], role, createdAt: new Date().toISOString() };
+  return delay<AuthResponse>({
+    user,
+    accessToken: 'mock-access-token',
+    refreshToken: 'mock-refresh-token',
   });
 }
 
 export async function register(
   email: string,
-  password: string,
+  _password: string,
   name: string,
   role: string = 'FAN',
 ) {
-  return request<AuthResponse>('/api/auth/register', {
-    method: 'POST',
-    body: JSON.stringify({ email, password, name, role }),
+  const user: User = { id: 'mock-user-2', email, name, role: role as User['role'], createdAt: new Date().toISOString() };
+  return delay<AuthResponse>({
+    user,
+    accessToken: 'mock-access-token',
+    refreshToken: 'mock-refresh-token',
   });
 }
 
 // ── Crowd ─────────────────────────────────────────────────────
 
+const mockZones: ZoneDensity[] = [
+  { zoneId: 'north-gate', zoneName: 'North Gate', zoneType: 'GATE', currentCount: 850, capacity: 1000, density: 85, level: 'HIGH', trend: 'RISING', timestamp: new Date().toISOString() },
+  { zoneId: 'food-court', zoneName: 'Food Court', zoneType: 'CONCESSION', currentCount: 200, capacity: 500, density: 40, level: 'LOW', trend: 'STABLE', timestamp: new Date().toISOString() },
+  { zoneId: 'merch-stand', zoneName: 'Merchandise Stand', zoneType: 'RETAIL', currentCount: 190, capacity: 200, density: 95, level: 'CRITICAL', trend: 'RISING', timestamp: new Date().toISOString() },
+];
+
 export async function getCrowdZones() {
-  return request<ZoneDensity[]>('/api/crowd/zones');
+  return delay<ZoneDensity[]>(mockZones);
 }
 
 export async function getCrowdForecast() {
-  return request<CrowdForecast>('/api/crowd/forecast');
+  return delay<CrowdForecast>({
+    forecast: JSON.stringify({
+      timestamps: ['12:00', '13:00', '14:00', '15:00', '16:00'],
+      series: [
+        { name: 'North Gate', data: [30, 45, 85, 90, 60] },
+        { name: 'Food Court', data: [10, 20, 40, 80, 50] },
+      ]
+    }),
+    timestamp: new Date().toISOString()
+  });
 }
 
 export async function getCrowdAlerts() {
-  return request<Array<{ zoneId: string; zoneName: string; density: number; message: string }>>(
-    '/api/crowd/alerts',
-  );
+  return delay<Array<{ zoneId: string; zoneName: string; density: number; message: string; level: string }>>([
+    { zoneId: 'north-gate', zoneName: 'North Gate', density: 85, message: 'High density at North Gate', level: 'HIGH' },
+    { zoneId: 'merch-stand', zoneName: 'Merchandise Stand', density: 95, message: 'Critical density at Merchandise Stand. Deploy staff.', level: 'CRITICAL' }
+  ]);
 }
 
 // ── Navigation ────────────────────────────────────────────────
 
-export async function askNavigation(query: string, currentLocation?: string, language = 'en') {
-  return request<{ response: string }>('/api/navigation/ask', {
-    method: 'POST',
-    body: JSON.stringify({ query, currentLocation, language }),
-  });
+export async function askNavigation(_query: string, _currentLocation?: string, _language = 'en') {
+  return delay<{ response: string }>({ response: "You can find the nearest restroom by heading straight and turning left at Section A." });
 }
 
 export async function getDirections(from: string, to: string) {
-  return request<{ path: string[]; totalMinutes: number }>(`/api/navigation/directions?from=${from}&to=${to}`);
+  return delay<{ path: string[]; totalMinutes: number }>({
+    path: ['Start at ' + from, 'Walk past Food Court', 'Arrive at ' + to],
+    totalMinutes: 5
+  });
 }
 
 export async function getVenue() {
-  return request<{ info: { name: string; capacity: number }; zones: VenueZone[] }>('/api/navigation/venue');
+  return delay<{ info: { name: string; capacity: number }; zones: VenueZone[] }>({
+    info: { name: 'Lusail Stadium', capacity: 80000 },
+    zones: [
+      { id: 'north-gate', name: 'North Gate', type: 'GATE', capacity: 1000, floor: 1, x: 0, y: 0, adjacent: [] },
+      { id: 'food-court', name: 'Food Court', type: 'CONCESSION', capacity: 500, floor: 1, x: 10, y: 10, adjacent: [] }
+    ]
+  });
 }
 
 // ── Incidents ─────────────────────────────────────────────────
+
+const mockIncidents: Incident[] = [
+  { id: 'inc-1', title: 'Medical emergency', description: 'Spectator requires medical assistance', status: 'OPEN', severity: 'HIGH', category: 'MEDICAL', zoneId: 'north-gate', reporterId: 'user-1', createdAt: new Date().toISOString() },
+  { id: 'inc-2', title: 'Spill', description: 'Soda spill', status: 'RESOLVED', severity: 'LOW', category: 'FACILITY', zoneId: 'food-court', reporterId: 'user-2', createdAt: new Date().toISOString() }
+];
 
 export async function createIncident(data: {
   title: string;
   description: string;
   zoneId: string;
 }) {
-  return request<Incident>('/api/incidents', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
+  const newInc: Incident = { id: `inc-${Date.now()}`, title: data.title, description: data.description, status: 'OPEN', severity: 'MEDIUM', category: 'CROWD', zoneId: data.zoneId, reporterId: 'me', createdAt: new Date().toISOString() };
+  mockIncidents.push(newInc);
+  return delay<Incident>(newInc);
 }
 
 export async function getIncidents(params?: {
@@ -153,33 +122,29 @@ export async function getIncidents(params?: {
   status?: string;
   category?: string;
 }) {
-  const query = new URLSearchParams();
-  if (params?.page) query.set('page', String(params.page));
-  if (params?.status) query.set('status', params.status);
-  if (params?.category) query.set('category', params.category);
-
-  return request<Incident[]>(`/api/incidents?${query.toString()}`);
+  return delay<Incident[]>(mockIncidents.filter(i => (!params?.status || params.status === 'ALL' || i.status === params.status)));
 }
 
 export async function updateIncidentStatus(id: string, status: string) {
-  return request<Incident>(`/api/incidents/${id}/status`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status }),
-  });
+  const inc = mockIncidents.find(i => i.id === id);
+  if (inc) inc.status = status as any;
+  return delay<Incident>(inc!);
 }
 
 // ── Volunteers ────────────────────────────────────────────────
 
+const mockTasks: Task[] = [
+  { id: 'task-1', title: 'Direct crowd', description: 'Help direct the crowd at the north gate', status: 'PENDING', priority: 'HIGH', zoneId: 'north-gate', createdAt: new Date().toISOString() }
+];
+
 export async function getTasks(status?: string) {
-  const query = status ? `?status=${status}` : '';
-  return request<Task[]>(`/api/volunteers/tasks${query}`);
+  return delay<Task[]>(mockTasks.filter(t => (!status || status === 'ALL' || t.status === status)));
 }
 
 export async function updateTaskStatus(id: string, status: string) {
-  return request<Task>(`/api/volunteers/tasks/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status }),
-  });
+  const task = mockTasks.find(t => t.id === id);
+  if (task) task.status = status as any;
+  return delay<Task>(task!);
 }
 
 export async function createTask(data: {
@@ -189,37 +154,33 @@ export async function createTask(data: {
   zoneId: string;
   assigneeId?: string;
 }) {
-  return request<Task>('/api/volunteers/tasks', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
+  const newTask: Task = { id: `task-${Date.now()}`, title: data.title, description: data.description, status: 'PENDING', priority: (data.priority as any) || 'MEDIUM', zoneId: data.zoneId, assigneeId: data.assigneeId, createdAt: new Date().toISOString() };
+  mockTasks.push(newTask);
+  return delay<Task>(newTask);
 }
 
 // ── Announcements ─────────────────────────────────────────────
 
-export async function getAnnouncements(language = 'en') {
-  return request<Announcement[]>(`/api/announcements?language=${language}`);
+const mockAnnouncements: Announcement[] = [
+  { id: 'ann-1', text: 'Welcome to StadiumPulse!', originalText: 'Welcome to StadiumPulse!', priority: 'INFO', createdAt: new Date().toISOString(), translations: {} }
+];
+
+export async function getAnnouncements(_language = 'en') {
+  return delay<Announcement[]>(mockAnnouncements);
 }
 
 export async function createAnnouncement(text: string, priority = 'INFO') {
-  return request<Announcement>('/api/announcements', {
-    method: 'POST',
-    body: JSON.stringify({ text, priority }),
-  });
+  const newAnn: Announcement = { id: `ann-${Date.now()}`, text, originalText: text, priority: priority as any, createdAt: new Date().toISOString(), translations: {} };
+  mockAnnouncements.unshift(newAnn);
+  return delay<Announcement>(newAnn);
 }
 
 // ── Decision Support ──────────────────────────────────────────
 
 export async function queryDecisionSupport(query: string) {
-  return request<{ query: string; recommendations: string; timestamp: string }>(
-    '/api/decisions/query',
-    {
-      method: 'POST',
-      body: JSON.stringify({ query }),
-    },
-  );
+  return delay<{ query: string; recommendations: string; timestamp: string }>({ query, recommendations: "Based on the mock data, recommend sending 3 volunteers to the merchandise stand to handle the crowd.", timestamp: new Date().toISOString() });
 }
 
 export async function getSituationSummary() {
-  return request<{ summary: string; timestamp: string }>('/api/decisions/summary');
+  return delay<{ summary: string; timestamp: string }>({ summary: "Overall situation is stable. High density observed at the merchandise stand.", timestamp: new Date().toISOString() });
 }
