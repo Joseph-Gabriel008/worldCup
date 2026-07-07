@@ -35,13 +35,13 @@ export default function FanHome() {
   const criticalZones = densities.filter((z) => z.level === 'CRITICAL' || z.level === 'HIGH');
 
   return (
-    <div className="page-shell max-w-screen-2xl mx-auto px-4 py-6 lg:py-8 space-y-6 lg:space-y-8 relative">
+    <div className="page-shell max-w-screen-2xl mx-auto px-4 py-8 lg:py-12 space-y-10 lg:space-y-14 relative">
       {/* Decorative Blur (Animated) */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[100px] -z-10 pointer-events-none animate-float delay-100" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/10 rounded-full blur-[100px] -z-10 pointer-events-none animate-float delay-500" />
 
       {/* Page Header */}
-      <div className="flex flex-col gap-4 animate-slide-in">
+      <div className="flex flex-col gap-6 animate-slide-in">
         <div className="flex flex-wrap items-center gap-3">
           <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[11px] font-bold uppercase tracking-[0.25em]">
             Live now
@@ -51,11 +51,11 @@ export default function FanHome() {
           </span>
         </div>
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-white drop-shadow-sm leading-none">
-              Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">MetLife Stadium</span>
+          <div className="relative z-10">
+            <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-lg leading-tight mb-4">
+              Welcome to <span className="gradient-text">MetLife Stadium</span>
             </h1>
-            <p className="text-[0.95rem] font-medium text-slate-400 mt-2 max-w-2xl leading-relaxed">
+            <p className="text-[1rem] font-medium text-slate-400 max-w-2xl leading-relaxed">
               A real-time fan companion for navigation, alerts, and crowd visibility across every concourse and gate.
             </p>
           </div>
@@ -230,14 +230,14 @@ function StatCard({
   bgGlow: string;
 }) {
   return (
-    <div className="glass-card p-5 flex flex-col gap-3 relative overflow-hidden group h-full transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-white/20">
-      <div className={cn("absolute -top-4 -right-4 w-24 h-24 rounded-full blur-2xl opacity-20 group-hover:opacity-50 transition-opacity duration-500 animate-pulse-glow", bgGlow)} />
-      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center shadow-lg border border-white/10 relative z-10 transition-transform duration-300 group-hover:scale-110', bgGlow, color)}>
-        <Icon className="w-6 h-6" aria-hidden="true" strokeWidth={2.5} />
+    <div className="glass-card p-4 sm:p-5 flex items-center gap-4 relative overflow-hidden group h-full transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-white/20">
+      <div className={cn("absolute -top-8 -right-8 w-32 h-32 rounded-full blur-[40px] opacity-20 group-hover:opacity-40 transition-opacity duration-500", bgGlow)} />
+      <div className={cn('w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl flex items-center justify-center shadow-lg border border-white/10 relative z-10 transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110', bgGlow, color)}>
+        <Icon className="w-6 h-6 sm:w-7 sm:h-7" aria-hidden="true" strokeWidth={2} />
       </div>
-      <div className="relative z-10 mt-1">
-        <p className="text-3xl font-black text-white drop-shadow-sm mb-1 tracking-tight">{value}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+      <div className="relative z-10 flex-1 min-w-0">
+        <p className="text-2xl sm:text-3xl font-black text-white drop-shadow-sm tracking-tight truncate">{value}</p>
+        <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate mt-0.5">{label}</p>
       </div>
     </div>
   );

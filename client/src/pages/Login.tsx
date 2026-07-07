@@ -48,7 +48,7 @@ export default function Login() {
       await login(account.email, account.password);
       navigate(account.redirect);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Demo login failed. Make sure the server is running.');
+      setError(err instanceof Error ? err.message : 'Demo login failed.');
     }
   };
 

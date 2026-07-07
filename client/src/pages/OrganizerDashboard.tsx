@@ -139,17 +139,17 @@ export default function OrganizerDashboard() {
         </div>
 
         {/* Right Column */}
-        <div className="space-y-8">
+        <div className="flex flex-col gap-6 lg:gap-8">
           
           {/* Situation Summary */}
-          <div className="glass-card p-4 sm:p-5 lg:p-6 flex flex-col relative overflow-hidden animate-slide-up delay-300 transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div className="glass-card p-5 lg:p-7 flex flex-col relative overflow-hidden animate-slide-up delay-300 transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-            <div className="flex items-center justify-between mb-4 relative z-10">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-accent/20 border border-accent/30 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-                  <FileText className="w-4 h-4 text-accent" aria-hidden="true" />
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-5 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-accent/20 border border-accent/30 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                  <FileText className="w-5 h-5 text-accent" aria-hidden="true" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Situation Summary</h3>
+                <h3 className="text-xl font-bold text-white tracking-tight">Situation Summary</h3>
               </div>
               <button
                 onClick={handleGetSummary}
@@ -175,16 +175,16 @@ export default function OrganizerDashboard() {
           </div>
 
           {/* AI Decision Support */}
-          <div className="glass-card p-4 sm:p-5 lg:p-6 flex flex-col relative overflow-hidden animate-slide-up delay-400 transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div className="glass-card p-5 lg:p-7 flex flex-col relative overflow-hidden animate-slide-up delay-400 transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-            <div className="flex items-center gap-2.5 mb-4 relative z-10">
-              <div className="p-2 rounded-lg bg-primary/20 border border-primary/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                <Brain className="w-4 h-4 text-primary" aria-hidden="true" />
+            <div className="flex items-center gap-3 mb-5 relative z-10">
+              <div className="p-2.5 rounded-xl bg-primary/20 border border-primary/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                <Brain className="w-5 h-5 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-bold text-white">AI Decision Support</h3>
+              <h3 className="text-xl font-bold text-white tracking-tight">AI Decision Support</h3>
             </div>
             
-            <div className="flex gap-3 mb-5 relative z-10">
+            <div className="flex flex-col sm:flex-row gap-3 mb-6 relative z-10">
               <input
                 type="text"
                 value={dsQuery}
@@ -216,16 +216,16 @@ export default function OrganizerDashboard() {
           </div>
 
           {/* Incident Feed */}
-          <div className="glass-card p-4 sm:p-5 lg:p-6 flex flex-col relative overflow-hidden animate-slide-up delay-500 transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div className="glass-card p-5 lg:p-7 flex flex-col relative overflow-hidden animate-slide-up delay-500 transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-            <div className="flex items-center gap-2.5 mb-4 relative z-10">
-              <div className="p-2 rounded-lg bg-orange-500/20 border border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
-                <AlertTriangle className="w-4 h-4 text-orange-400" aria-hidden="true" />
+            <div className="flex items-center gap-3 mb-5 relative z-10">
+              <div className="p-2.5 rounded-xl bg-orange-500/20 border border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                <AlertTriangle className="w-5 h-5 text-orange-400" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-bold text-white">Active Incidents</h3>
+              <h3 className="text-xl font-bold text-white tracking-tight">Active Incidents</h3>
             </div>
             
-            <div className="space-y-4 max-h-[24rem] overflow-y-auto pr-2 custom-scrollbar relative z-10">
+            <div className="space-y-5 max-h-[26rem] overflow-y-auto pr-3 custom-scrollbar relative z-10">
               {incidents.length > 0 ? (
                 incidents.map((incident) => (
                   <div key={incident.id} className="bg-slate-900/50 border border-white/5 rounded-xl p-4 space-y-3 hover:bg-slate-800/60 transition-all duration-300 hover:scale-[1.02]">
@@ -261,16 +261,16 @@ export default function OrganizerDashboard() {
                       </div>
                     )}
                     
-                    <div className="flex gap-2.5 pt-2 border-t border-white/5">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-white/10">
                       <button
                         onClick={() => handleUpdateStatus(incident.id, 'IN_PROGRESS')}
-                        className="flex-1 text-[10px] font-bold uppercase tracking-wider px-3 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all hover:shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+                        className="flex-1 text-[11px] font-bold uppercase tracking-wider px-4 py-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all hover:shadow-[0_0_10px_rgba(139,92,246,0.3)]"
                       >
                         Acknowledge
                       </button>
                       <button
                         onClick={() => handleUpdateStatus(incident.id, 'RESOLVED')}
-                        className="flex-1 text-[10px] font-bold uppercase tracking-wider px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all hover:shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                        className="flex-1 text-[11px] font-bold uppercase tracking-wider px-4 py-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all hover:shadow-[0_0_10px_rgba(16,185,129,0.3)]"
                       >
                         Resolve
                       </button>

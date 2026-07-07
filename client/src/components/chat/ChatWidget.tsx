@@ -85,19 +85,20 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-accent shadow-[0_0_30px_rgba(99,102,241,0.5)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 animate-pulse-glow group"
+          className="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary via-purple-500 to-accent shadow-[0_8px_32px_rgba(139,92,246,0.5)] flex items-center justify-center hover:scale-110 hover:shadow-[0_12px_40px_rgba(139,92,246,0.7)] active:scale-95 transition-all duration-300 z-50 group border border-white/20"
           aria-label="Open StadiumPulse AI chat assistant"
           title="Ask StadiumPulse AI"
         >
-          <MessageCircle className="w-7 h-7 text-white group-hover:rotate-12 transition-transform duration-300" strokeWidth={2.5} />
-          <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full border-2 border-[#050810] animate-bounce" />
+          <div className="absolute inset-0 rounded-full animate-ping opacity-20 bg-primary" />
+          <MessageCircle className="w-7 h-7 text-white group-hover:rotate-12 transition-transform duration-300 relative z-10" strokeWidth={2.5} />
+          <div className="absolute top-0 right-0 w-4 h-4 bg-accent rounded-full border-2 border-[#020617] animate-bounce z-20 shadow-[0_0_10px_rgba(244,63,94,0.8)]" />
         </button>
       )}
 
       {/* Chat Panel */}
       {isOpen && (
         <div
-          className="fixed inset-x-3 bottom-3 sm:bottom-6 sm:right-6 sm:left-auto w-auto sm:w-[420px] max-w-[calc(100vw-1.5rem)] h-[min(34rem,calc(100vh-1.5rem))] sm:h-[36rem] max-h-[calc(100vh-1.5rem)] bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-3xl flex flex-col z-50 animate-fade-in shadow-2xl overflow-hidden"
+          className="fixed inset-x-3 bottom-3 sm:bottom-8 sm:right-8 sm:left-auto w-auto sm:w-[420px] max-w-[calc(100vw-1.5rem)] h-[min(34rem,calc(100vh-1.5rem))] sm:h-[36rem] max-h-[calc(100vh-1.5rem)] bg-[#020617]/80 backdrop-blur-3xl border border-white/10 rounded-3xl flex flex-col z-50 animate-fade-in shadow-[0_16px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden"
           role="dialog"
           aria-label="StadiumPulse AI navigation assistant"
           aria-modal="false"
