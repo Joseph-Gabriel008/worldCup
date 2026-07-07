@@ -77,15 +77,21 @@ export async function getCrowdAlerts() {
   ]);
 }
 
-// ── Navigation ────────────────────────────────────────────────
+// ── Navigation (GenAI Simulated) ────────────────────────────────
 
-export async function askNavigation(_query: string, _currentLocation?: string, _language = 'en') {
-  return delay<{ response: string }>({ response: "You can find the nearest restroom by heading straight and turning left at Section A." });
+export async function askNavigation(query: string, _currentLocation?: string, language = 'en') {
+  let response = "You can find the nearest restroom by heading straight and turning left at Section A.";
+  if (language === 'fr') response = "Vous pouvez trouver les toilettes les plus proches en allant tout droit et en tournant à gauche à la Section A.";
+  if (language === 'es') response = "Puede encontrar el baño más cercano yendo derecho y girando a la izquierda en la Sección A.";
+  
+  return delay<{ response: string }>({ 
+    response: `**AI Navigation Assistant:**\n\nBased on the live venue graph, the optimal route for your query "${query}" is:\n\n1. Head North from your current zone.\n2. Bypass the Food Court (currently experiencing 80% congestion).\n3. ${response}\n\n*Estimated walking time: 4 minutes.*` 
+  });
 }
 
 export async function getDirections(from: string, to: string) {
   return delay<{ path: string[]; totalMinutes: number }>({
-    path: ['Start at ' + from, 'Walk past Food Court', 'Arrive at ' + to],
+    path: [`Start at ${from}`, 'Walk past Food Court (AI routed to avoid congestion)', `Arrive at ${to}`],
     totalMinutes: 5
   });
 }
@@ -100,11 +106,11 @@ export async function getVenue() {
   });
 }
 
-// ── Incidents ─────────────────────────────────────────────────
+// ── Incidents (GenAI Simulated) ───────────────────────────────────
 
 const mockIncidents: Incident[] = [
-  { id: 'inc-1', title: 'Medical emergency', description: 'Spectator requires medical assistance', status: 'OPEN', severity: 'HIGH', category: 'MEDICAL', zoneId: 'north-gate', reporterId: 'user-1', createdAt: new Date().toISOString() },
-  { id: 'inc-2', title: 'Spill', description: 'Soda spill', status: 'RESOLVED', severity: 'LOW', category: 'FACILITY', zoneId: 'food-court', reporterId: 'user-2', createdAt: new Date().toISOString() }
+  { id: 'inc-1', title: 'Medical emergency', description: 'Spectator requires medical assistance', status: 'OPEN', severity: 'HIGH', category: 'MEDICAL', zoneId: 'north-gate', reporterId: 'user-1', createdAt: new Date().toISOString(), aiSummary: 'Urgent medical response required. Dispatch EMT team Alpha.' },
+  { id: 'inc-2', title: 'Spill', description: 'Soda spill', status: 'RESOLVED', severity: 'LOW', category: 'FACILITY', zoneId: 'food-court', reporterId: 'user-2', createdAt: new Date().toISOString(), aiSummary: 'Low priority facility hazard. Janitorial staff assigned.' }
 ];
 
 export async function createIncident(data: {
@@ -112,7 +118,7 @@ export async function createIncident(data: {
   description: string;
   zoneId: string;
 }) {
-  const newInc: Incident = { id: `inc-${Date.now()}`, title: data.title, description: data.description, status: 'OPEN', severity: 'MEDIUM', category: 'CROWD', zoneId: data.zoneId, reporterId: 'me', createdAt: new Date().toISOString() };
+  const newInc: Incident = { id: `inc-${Date.now()}`, title: data.title, description: data.description, status: 'OPEN', severity: 'MEDIUM', category: 'CROWD', zoneId: data.zoneId, reporterId: 'me', createdAt: new Date().toISOString(), aiSummary: 'GenAI categorized this as a crowd incident. Recommended action: Monitor.' };
   mockIncidents.push(newInc);
   return delay<Incident>(newInc);
 }
@@ -127,7 +133,7 @@ export async function getIncidents(params?: {
 
 export async function updateIncidentStatus(id: string, status: string) {
   const inc = mockIncidents.find(i => i.id === id);
-  if (inc) inc.status = status as any;
+  if (inc) inc.status = status as Incident['status'];
   return delay<Incident>(inc!);
 }
 
@@ -143,7 +149,7 @@ export async function getTasks(status?: string) {
 
 export async function updateTaskStatus(id: string, status: string) {
   const task = mockTasks.find(t => t.id === id);
-  if (task) task.status = status as any;
+  if (task) task.status = status as Task['status'];
   return delay<Task>(task!);
 }
 
@@ -154,15 +160,15 @@ export async function createTask(data: {
   zoneId: string;
   assigneeId?: string;
 }) {
-  const newTask: Task = { id: `task-${Date.now()}`, title: data.title, description: data.description, status: 'PENDING', priority: (data.priority as any) || 'MEDIUM', zoneId: data.zoneId, assigneeId: data.assigneeId, createdAt: new Date().toISOString() };
+  const newTask: Task = { id: `task-${Date.now()}`, title: data.title, description: data.description, status: 'PENDING', priority: (data.priority as Task['priority']) || 'MEDIUM', zoneId: data.zoneId, assigneeId: data.assigneeId, createdAt: new Date().toISOString() };
   mockTasks.push(newTask);
   return delay<Task>(newTask);
 }
 
-// ── Announcements ─────────────────────────────────────────────
+// ── Announcements (GenAI Simulated) ───────────────────────────
 
 const mockAnnouncements: Announcement[] = [
-  { id: 'ann-1', text: 'Welcome to StadiumPulse!', originalText: 'Welcome to StadiumPulse!', priority: 'INFO', createdAt: new Date().toISOString(), translations: {} }
+  { id: 'ann-1', text: 'Welcome to StadiumPulse!', originalText: 'Welcome to StadiumPulse!', priority: 'INFO', createdAt: new Date().toISOString(), translations: { es: '¡Bienvenido a StadiumPulse!', fr: 'Bienvenue sur StadiumPulse!' } }
 ];
 
 export async function getAnnouncements(_language = 'en') {
@@ -170,17 +176,24 @@ export async function getAnnouncements(_language = 'en') {
 }
 
 export async function createAnnouncement(text: string, priority = 'INFO') {
-  const newAnn: Announcement = { id: `ann-${Date.now()}`, text, originalText: text, priority: priority as any, createdAt: new Date().toISOString(), translations: {} };
+  const newAnn: Announcement = { id: `ann-${Date.now()}`, text, originalText: text, priority: priority as Announcement['priority'], createdAt: new Date().toISOString(), translations: {} };
   mockAnnouncements.unshift(newAnn);
   return delay<Announcement>(newAnn);
 }
 
-// ── Decision Support ──────────────────────────────────────────
+// ── Decision Support (GenAI Simulated) ─────────────────────────
 
 export async function queryDecisionSupport(query: string) {
-  return delay<{ query: string; recommendations: string; timestamp: string }>({ query, recommendations: "Based on the mock data, recommend sending 3 volunteers to the merchandise stand to handle the crowd.", timestamp: new Date().toISOString() });
+  return delay<{ query: string; recommendations: string; timestamp: string }>({ 
+    query, 
+    recommendations: `**GenAI Operational Analysis:**\n\nI have analyzed your query: "${query}" against live stadium telemetry.\n\n* **Finding 1**: The Merchandise Stand is approaching 95% capacity.\n* **Finding 2**: North Gate throughput is slowing down.\n\n**Recommended Actions:**\n1. Automatically dispatch 3 floating volunteers to the Merchandise Stand.\n2. Broadcast a multi-lingual PA announcement redirecting fans to the South Concourse.\n3. Open overflow Gate 4.`, 
+    timestamp: new Date().toISOString() 
+  });
 }
 
 export async function getSituationSummary() {
-  return delay<{ summary: string; timestamp: string }>({ summary: "Overall situation is stable. High density observed at the merchandise stand.", timestamp: new Date().toISOString() });
+  return delay<{ summary: string; timestamp: string }>({ 
+    summary: "**GenAI Real-Time Synthesis:**\n\nThe venue is operating at 82% overall capacity. \n\n⚠️ **Anomalies Detected:** The Merchandise Stand (Zone C) is experiencing a +15% surge above predicted density models. \n\n✅ **Automated Responses:** AI has proactively queued 2 tasks for volunteer deployment to Zone C and pre-translated emergency broadcast templates just in case.", 
+    timestamp: new Date().toISOString() 
+  });
 }

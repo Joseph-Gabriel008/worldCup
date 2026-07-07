@@ -29,9 +29,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       const res = await api.login(email, password);
       if (res.success && res.data) {
         const { user, accessToken, refreshToken } = res.data;
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('accessToken', accessToken);
+        sessionStorage.setItem('refreshToken', refreshToken);
+        sessionStorage.setItem('user', JSON.stringify(user));
         set({ user, isAuthenticated: true, isLoading: false });
       } else {
         throw new Error(res.error || 'Login failed');
@@ -48,9 +48,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       const res = await api.register(email, password, name, role);
       if (res.success && res.data) {
         const { user, accessToken, refreshToken } = res.data;
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('accessToken', accessToken);
+        sessionStorage.setItem('refreshToken', refreshToken);
+        sessionStorage.setItem('user', JSON.stringify(user));
         set({ user, isAuthenticated: true, isLoading: false });
       } else {
         throw new Error(res.error || 'Registration failed');
@@ -62,20 +62,20 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('user');
     set({ user: null, isAuthenticated: false });
   },
 
   setLanguage: (lang) => {
-    localStorage.setItem('language', lang);
+    localStorage.setItem('language', lang); // Language is fine in localStorage
     set({ language: lang });
   },
 
   checkAuth: () => {
-    const userStr = localStorage.getItem('user');
-    const token = localStorage.getItem('accessToken');
+    const userStr = sessionStorage.getItem('user');
+    const token = sessionStorage.getItem('accessToken');
     if (userStr && token) {
       try {
         const user = JSON.parse(userStr) as User;
